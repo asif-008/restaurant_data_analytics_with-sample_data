@@ -26,6 +26,18 @@ def get_daily_total(weekday_sale_distribution_dataframe, weekday_name):
 
 # Define function to divide total sale numbers among hours
 def divide_sale_num_among_hours(total, parts):
+
+    if total == 0:
+        parts_list = [0] * parts  # assign 0 to each part if total is 0
+        return parts_list
+    elif total == 1:
+        parts_list = [0] * (parts-1) + [1]  # assign 0 to each part if total is 0
+        return parts_list
+
+    elif parts > total:
+        parts_list = [0] * (parts - 1) + [total]  # assign 0 to each part if total is 0
+        return parts_list
+
     # Generate a list of random integers between 1 and 'total - 1'
     divisors = sorted(random.sample(range(1, total), parts - 1))
     # Calculate the differences between adjacent divisors and append total
@@ -149,8 +161,7 @@ def generate_day_sale_data(sale_id_, date):
         for item in hour_data:
             day_data.append(item)
         hour += 1
-
-    return pd.concat(day_data), sale_id_
+    return day_data, sale_id_
 
 
 # Load data from Excel workbook
@@ -172,7 +183,8 @@ product_quantity_probability_data = workbook['Product_quantity_probability'].cop
 product_quantity_probability_data['Probability'] = product_quantity_probability_data['Probability(in percentage)'].astype(float) / 100.0
 
 # Create empty DataFrame for sales data
-sales_data = pd.DataFrame(columns=['Unique Id', 'Date', 'Time', 'Item', 'Item_quantity', 'Price'])
+#sales_data = pd.DataFrame(columns=['Unique Id', 'Date', 'Time', 'Item', 'Item_quantity', 'Price'])
+sales_data = []
 
 # Set parameters
 unique_id = 37589
@@ -183,8 +195,12 @@ date = datetime.strptime(start_date, '%Y-%m-%d')
 
 g_date = date.strftime('%Y-%m-%d')
 
-while g_date != end_date or unique_id != 37610:
+while g_date != end_date and unique_id <= 38590:
     day_data, unique_id = generate_day_sale_data(unique_id, date)
-    sales_data = sales_data.append(day_data, ignore_index=True)
+    unique_id = int(unique_id)
+    for an_item in day_data:
+        sales_data.append(an_item)
     date += timedelta(days=1)
     g_date = date.strftime('%Y-%m-%d')
+
+print(sales_data)
