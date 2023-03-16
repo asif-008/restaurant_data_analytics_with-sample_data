@@ -1,0 +1,1 @@
+Till now I mistakenly used my school account to interact with git. From this commit, I am going to use my personal account. this file is to help me remember this occurance and to confirm via committing that I switched to my acccount.
