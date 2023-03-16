@@ -43,7 +43,6 @@ def divide_sale_num_among_hours(total, parts):
     # Calculate the differences between adjacent divisors and append total
     # to the list to get a list of parts that add up to total
     parts_list = [divisors[0]] + [divisors[i] - divisors[i - 1] for i in range(1, parts - 1)] + [total - divisors[-1]]
-
     return parts_list
 
 
@@ -64,6 +63,7 @@ def get_distribution_of_sale_among_hours(sale_per_time_of_day_dataframe, total_s
             distribution[start_hour] = divided_sale_num_list[counter]
             start_hour+=1
             num_hours -=1
+            counter +=1
     return distribution
 
 
@@ -155,6 +155,7 @@ def generate_day_sale_data(sale_id_, date):
     day_of_week = date.strftime('%A')  # get day of the week for the given date
     total_sale = get_daily_total(weekday_sale_distribution_data, day_of_week)  # generate total sale number for the day using weekday_sale_distribution_data
     distribution_of_sale_among_hours = get_distribution_of_sale_among_hours(sale_per_time_of_day_data, total_sale)
+
     while hour != 22:
         hourly_total = distribution_of_sale_among_hours[hour]
         hour_data, sale_id_ = generate_hour_sale_data(sale_id_, date, hour, hourly_total)
@@ -182,8 +183,6 @@ product_quantity_probability_data = workbook['Product_quantity_probability'].cop
 # Convert probability percentages to decimal probabilities
 product_quantity_probability_data['Probability'] = product_quantity_probability_data['Probability(in percentage)'].astype(float) / 100.0
 
-# Create empty DataFrame for sales data
-#sales_data = pd.DataFrame(columns=['Unique Id', 'Date', 'Time', 'Item', 'Item_quantity', 'Price'])
 sales_data = []
 
 # Set parameters
@@ -195,7 +194,7 @@ date = datetime.strptime(start_date, '%Y-%m-%d')
 
 g_date = date.strftime('%Y-%m-%d')
 
-while g_date != end_date and unique_id <= 38590:
+while g_date != end_date and unique_id <= 87589:
     day_data, unique_id = generate_day_sale_data(unique_id, date)
     unique_id = int(unique_id)
     for an_item in day_data:
@@ -203,4 +202,8 @@ while g_date != end_date and unique_id <= 38590:
     date += timedelta(days=1)
     g_date = date.strftime('%Y-%m-%d')
 
-print(sales_data)
+# Create empty DataFrame for sales data
+df = pd.DataFrame(sales_data, columns=['Unique Id', 'Date', 'Time', 'Item', 'Item_quantity', 'Price'])
+
+# Write the dataframe to an Excel file
+df.to_excel(r"C:\Users\Admin\Documents\Restaurant_analytics_on_sample_data\ sample_data.xlsx", index=False, engine='openpyxl')
