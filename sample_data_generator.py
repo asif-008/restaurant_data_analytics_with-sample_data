@@ -1,6 +1,7 @@
 import pandas as pd
 from datetime import datetime, timedelta
-import openpyxl
+import argparse
+from pathlib import Path
 import random
 
 
@@ -165,8 +166,22 @@ def generate_day_sale_data(sale_id_, date):
     return day_data, sale_id_
 
 
-# Load data from Excel workbook
-workbook = pd.read_excel('demo_sale_generator_constrains.xlsx', dtype=str, sheet_name=None)
+parser = argparse.ArgumentParser(description="Generate simulated pizza shop orders in a new Excel workbook.")
+parser.add_argument("--output", type=Path, default=Path("generated_sales.xlsx"),
+                    help="new workbook path (default: generated_sales.xlsx in the current directory)")
+parser.add_argument("--seed", type=int, help="repeat the same random draws")
+args = parser.parse_args()
+if args.output.suffix.lower() != ".xlsx":
+    parser.error("Choose an output filename ending in .xlsx.")
+if args.output.exists():
+    parser.error(f"Output already exists: {args.output}. Choose a new filename.")
+if not args.output.parent.is_dir():
+    parser.error(f"Output directory does not exist: {args.output.parent}")
+if args.seed is not None:
+    random.seed(args.seed)
+
+settings_path = Path(__file__).with_name("demo_sale_generator_constrains.xlsx")
+workbook = pd.read_excel(settings_path, dtype=str, sheet_name=None)
 
 # Extract each sheet as a separate DataFrame
 menu_data = workbook['menu'].copy()
@@ -205,5 +220,17 @@ while g_date != end_date and unique_id <= 87589:
 # Create empty DataFrame for sales data
 df = pd.DataFrame(sales_data, columns=['Unique Id', 'Date', 'Time', 'Item', 'Item_quantity', 'Price'])
 
-# Write the dataframe to an Excel file
-df.to_excel(r"C:\Users\Admin\Documents\Restaurant_analytics_on_sample_data\ sample_data.xlsx", index=False, engine='openpyxl')
+# Exclusive creation also protects a file created while the simulation was running.
+try:
+    output_file = args.output.open("xb")
+except FileExistsError:
+    parser.error(f"Output already exists: {args.output}. Choose a new filename.")
+
+try:
+    with output_file:
+        df.to_excel(output_file, index=False, engine="openpyxl")
+except BaseException:
+    args.output.unlink(missing_ok=True)
+    raise
+
+print(f"Wrote {len(df):,} line items to {args.output.resolve()}")

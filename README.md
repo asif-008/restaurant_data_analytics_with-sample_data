@@ -18,4 +18,15 @@ In the saved workbook, the **Sale of Diff. items** sheet reports **39,108 units 
 2. Draw a basket size for each order and sample its items using the menu weights. The output records one row per distinct item in an order, with quantity and line revenue.
 3. In Excel, group rows by order ID for basket sizes, sum quantities for item demand, and sum line revenue for daily sales. An order ID represents one transaction; the data cannot identify returning customers.
 
-The [saved transactions](%20sample_data.xlsx) and dashboard workbook can be explored directly. To generate another sample, run the script from the directory containing the settings workbook with pandas and openpyxl installed. Set the output path in the final spreadsheet export to your preferred destination. Random draws will produce a different sample.
+The [saved transactions](%20sample_data.xlsx) and dashboard workbook can be explored directly.
+
+## Generate a new workbook
+
+From the project directory, install the dependencies and run the generator:
+
+```sh
+python -m pip install pandas openpyxl
+python sample_data_generator.py --output pizza_orders.xlsx --seed 42
+```
+
+The script loads the settings workbook beside the script and writes the new file in your current directory. Omit `--seed` for a fresh random sample. With the same settings and Python environment, using the same seed reproduces the transaction rows. Omit `--output` to use `generated_sales.xlsx`. Each run requires an unused filename.
